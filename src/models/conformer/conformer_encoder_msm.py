@@ -2,7 +2,7 @@ import torch
 from models.conformer.conformer_block import ConformerBlock
 from models.conformer.repeat import repeat
 from models.transformer.embedding import PositionalEncoding
-from models.conformer.masked_positional_encoding import MaskedPositionalEncoding
+from models.conformer.positional_encoding import MaskedPositionalEncoding
 
 
 class ConformerEncoder(torch.nn.Module):
