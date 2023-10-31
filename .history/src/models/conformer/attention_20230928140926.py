@@ -212,7 +212,7 @@ class RelMultiHeadAttn(nn.Module):
 
         return x
 
-    @get_local('attn_score')
+    @get_local('self.attn')
     def forward(self, w, attn_mask=None, mems=None):
         # Note: w shape is (T, B, D)
         pos_seq = torch.arange(w.size(0) - 1, -1, -1.0, device=w.device, dtype=w.dtype)

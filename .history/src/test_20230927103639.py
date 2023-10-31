@@ -40,7 +40,7 @@ def seed_everything(seed):
 def parse_args(args):
     parser = argparse.ArgumentParser()
 
-    parser.add_argument("--exp_name", default="20_proteacher", type=str, help="exp name used for the training")
+    parser.add_argument("--exp_name", default="20_proteacher_l2p5", type=str, help="exp name used for the training")
     parser.add_argument("--debugmode", default=True, action="store_true", help="Debugmode")
     parser.add_argument("--verbose", "-V", default=0, type=int, help="Verbose option")
     parser.add_argument("--test_meta", default="/data0/gaolj/sed_data/DCASE2020/metadata/eval/public.tsv")
@@ -139,7 +139,7 @@ def main(args):
                      encoder_kwargs=cfg["model"]["encoder"],
                      )
     #%%
-    checkpoint = torch.load(exp_name / "model" / "model_best_score.pth")
+    checkpoint = torch.load(exp_name / "model" / "model_best_loss.pth")
     model.load_state_dict(checkpoint["state_dict"])
     trainer_options = MeanTeacherTrainerOptions(**cfg["trainer_options"])
     trainer_options._set_validation_options(

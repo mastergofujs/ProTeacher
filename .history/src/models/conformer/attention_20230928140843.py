@@ -56,7 +56,7 @@ class MultiHeadedAttention(nn.Module):
         self.attn = None
         self.dropout1 = nn.Dropout(dropout_rate)
         self.dropout2 = nn.Dropout(dropout_rate)
-
+    
     def forward(self, x, mask):
         # pre norm
         x = self.norm(x)
@@ -212,7 +212,7 @@ class RelMultiHeadAttn(nn.Module):
 
         return x
 
-    @get_local('attn_score')
+    @get_local('self.attn')
     def forward(self, w, attn_mask=None, mems=None):
         # Note: w shape is (T, B, D)
         pos_seq = torch.arange(w.size(0) - 1, -1, -1.0, device=w.device, dtype=w.dtype)
@@ -292,4 +292,4 @@ class RelMultiHeadAttn(nn.Module):
             ##### residual connection + layer normalization
             output = self.layer_norm(w + attn_out)
 
-        return output
+        return output, self.attn

@@ -105,7 +105,7 @@ trainer_options:
   train_steps: 30000
   rampup_length: 10000
   consistency_cost: 2.0
-  use_mixup: False
+  use_mixup: True
   binarization_type: "global_threshold"
   threshold: 0.5
   early_stopping: False

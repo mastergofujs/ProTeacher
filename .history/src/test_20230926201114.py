@@ -21,7 +21,7 @@ from torch.utils.data import DataLoader
 
 from baseline_utils.ManyHotEncoder import ManyHotEncoder
 from dataset import SEDDataset
-from models.pro_teacher import SEDModel 
+from models.sed_model import SEDModel 
 from post_processing import PostProcess
 from trainer import MeanTeacherTrainerOptions
 from transforms import get_transforms
@@ -40,7 +40,7 @@ def seed_everything(seed):
 def parse_args(args):
     parser = argparse.ArgumentParser()
 
-    parser.add_argument("--exp_name", default="20_proteacher", type=str, help="exp name used for the training")
+    parser.add_argument("--exp_name", default="20_proteacher_l2p5", type=str, help="exp name used for the training")
     parser.add_argument("--debugmode", default=True, action="store_true", help="Debugmode")
     parser.add_argument("--verbose", "-V", default=0, type=int, help="Verbose option")
     parser.add_argument("--test_meta", default="/data0/gaolj/sed_data/DCASE2020/metadata/eval/public.tsv")

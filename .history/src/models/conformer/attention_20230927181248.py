@@ -1,5 +1,5 @@
 import math
-from visualizer import get_local
+
 import numpy
 import torch
 import torch.nn as nn
@@ -212,7 +212,6 @@ class RelMultiHeadAttn(nn.Module):
 
         return x
 
-    @get_local('attn_score')
     def forward(self, w, attn_mask=None, mems=None):
         # Note: w shape is (T, B, D)
         pos_seq = torch.arange(w.size(0) - 1, -1, -1.0, device=w.device, dtype=w.dtype)
@@ -292,4 +291,4 @@ class RelMultiHeadAttn(nn.Module):
             ##### residual connection + layer normalization
             output = self.layer_norm(w + attn_out)
 
-        return output
+        return output, self.attn
