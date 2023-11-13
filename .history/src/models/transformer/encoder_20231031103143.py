@@ -26,13 +26,13 @@ class Encoder(torch.nn.Module):
             PositionalEncoding(args['adim'], args['dropout_rate']),
         )
         self.encoders = repeat(
-            args['elayers'],
+            args.elayers,
             lambda: EncoderLayer(
                 args['adim'],
                 MultiHeadedAttention(args['aheads'], args['adim'], 0.2),
                 PositionwiseFeedForward(args['adim'], args['eunits'], 0.2),
-                args['dropout_rate'],
-                False,
+                args'dropout_rate'],
+                args.after_conv,
             ),
         )
         self.norm = LayerNorm(args['adim'])

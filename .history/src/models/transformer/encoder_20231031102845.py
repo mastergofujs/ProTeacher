@@ -19,23 +19,23 @@ class Encoder(torch.nn.Module):
     def __init__(self, idim, args, pos_enc=True):
         super(Encoder, self).__init__()
         self.input_layer = torch.nn.Sequential(
-            torch.nn.Linear(idim, args['adim']),
-            torch.nn.LayerNorm(args['adim']),
-            torch.nn.Dropout(args['dropout_rate']),
+            torch.nn.Linear(idim, args.adim),
+            torch.nn.LayerNorm(args.adim),
+            torch.nn.Dropout(args.dropout_rate),
             torch.nn.ReLU(),
-            PositionalEncoding(args['adim'], args['dropout_rate']),
+            PositionalEncoding(args.adim, args.dropout_rate),
         )
         self.encoders = repeat(
-            args['elayers'],
+            args.elayers,
             lambda: EncoderLayer(
-                args['adim'],
-                MultiHeadedAttention(args['aheads'], args['adim'], 0.2),
-                PositionwiseFeedForward(args['adim'], args['eunits'], 0.2),
-                args['dropout_rate'],
-                False,
+                args.adim,
+                MultiHeadedAttention(args.aheads, args.adim, args.transformer_attn_dropout_rate),
+                PositionwiseFeedForward(args.adim, args.eunits, args.dropout_rate),
+                args.dropout_rate,
+                args.after_conv,
             ),
         )
-        self.norm = LayerNorm(args['adim'])
+        self.norm = LayerNorm(args.adim)
 
     def forward(self, x, mask=None):
         """Embed positions in tensor
@@ -44,6 +44,13 @@ class Encoder(torch.nn.Module):
         :return: position embedded tensor and mask
         :rtype Tuple[torch.Tensor, torch.Tensor]:
         """
-        x = self.input_layer(x)
+        if isinstance(self.input_layer, Conv2dNoSubsampling):
+            x, mask = self.input_layer(x, mask)
+        elif isinstance(self.input_layer, Conv2dSubsampling):
+            x, mask = self.input_layer(x, mask)
+        else:
+            x = self.input_layer(x)
+        #         x, mask = self.encoders(x, mask)
+        #         return x, mask
         x, mask = self.encoders(x, mask)
         return self.norm(x), mask

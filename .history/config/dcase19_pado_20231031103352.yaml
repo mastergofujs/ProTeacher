@@ -67,7 +67,7 @@ model:
 # ====== Experiment setting ======
 # experiment
 wandb_project: DCASE19_PADO
-exp_name: 19_trans_base
+exp_name: 19_pado_trans_base
 resume:
 pretrained:
 

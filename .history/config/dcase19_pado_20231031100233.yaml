@@ -37,7 +37,6 @@ model:
     kernel_size: 7
     prompt_nums: 1
     prompt_layers: 2
-    transformer_input_layer: linear
 
   decoder:
     idim: 144
@@ -67,7 +66,7 @@ model:
 # ====== Experiment setting ======
 # experiment
 wandb_project: DCASE19_PADO
-exp_name: 19_trans_base
+exp_name: 19_pado_trans
 resume:
 pretrained:
 
