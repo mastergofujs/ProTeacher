@@ -1,4 +1,4 @@
-import numpy as np
+
 import torch
 from torch import nn
 import math
@@ -142,24 +142,21 @@ class ConformerMaskedDecoder(torch.nn.Module):
         if cls_token:
             # Note: here input x is unmasked with cls_token
             if with_prompts:
-                inds_all = np.concatenate([masked_id + 1 + self.pnums, 
-                                           np.zeros(1, dtype=np.int64), 
-                                           unmasked_id + 1 + self.pnums])
-                
+                inds_all = torch.cat([torch.tensor(masked_id + 1 + self.pnums),
+                                      torch.zeros(1, dtype=torch.int64), 
+                                      torch.tensor(unmasked_id + 1 + self.pnums)]).sort()[0] 
             else:
-                inds_all = np.concatenate([masked_id + 1, 
-                                           np.zeros(1, dtype=np.int64), 
-                                           unmasked_id + 1]) 
+                inds_all = torch.cat([torch.tensor(masked_id + 1), 
+                                      torch.zeros(1, dtype=torch.int64), 
+                                      torch.tensor(unmasked_id + 1)]).sort()[0]  
         else:
-            inds_all = np.concatenate([masked_id, unmasked_id])
-        #!!!Important!
-        inds_all.sort()
+            inds_all = torch.cat([masked_id, unmasked_id])
         x_u = torch.zeros((b, len(inds_all), d)).cuda()
         if cls_token:
-            unmasked_ = np.concatenate([np.zeros(1, dtype=np.int64), unmasked_id + 1])
+            unmasked_ = torch.cat([torch.zeros(1, dtype=torch.int64), unmasked_id + 1])
             x_u[:, masked_id + 1, :] = self.mask_embed
         else:
-            unmasked_ = np.sort(unmasked_id)
+            unmasked_ = unmasked_id
             x_u[:, masked_id, :] = self.mask_embed
         x_u[:, unmasked_, :] = x
         x_u = self.input_layer(x_u)

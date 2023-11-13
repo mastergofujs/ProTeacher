@@ -100,7 +100,7 @@ class CNNLocalDownsampler(torch.nn.Module):
         masked_inds = shuffled_ind[:masked_p]
         unmasked_inds = shuffled_ind[masked_p:]
         unmasked_patchs = x[:, unmasked_inds, :]
-        return unmasked_patchs, masked_inds.detach().cpu().numpy(), unmasked_inds.detach().cpu().numpy()
+        return unmasked_patchs, masked_inds, unmasked_inds
 
     def forward(self, x, mask=False, **mask_kwargs):
         x = self.temporal_patchifying(x)

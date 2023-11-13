@@ -65,7 +65,7 @@ model:
 # ====== Experiment setting ======
 # experiment
 wandb_project: DCASE19_PADO
-exp_name: 19_jointformer
+exp_name: 19_joint_former
 resume:
 pretrained:
 

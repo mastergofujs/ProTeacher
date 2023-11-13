@@ -1,5 +1,6 @@
+from multiprocessing import pool
 import torch
-from models.conformer.conformer_encoder1 import ConformerEncoder, ConformerMaskedEncoder
+from models.conformer.conformer_encoder import ConformerEncoder, ConformerMaskedEncoder
 from models.transformer.encoder import Encoder as TransformerEncoder
 from models.conformer.downsampler import CNNLocalDownsampler, ConformerDownsamplerBlock
 from models.conformer.conformer_decoder import ConformerMaskedDecoder, MaskedLinearDecoder
@@ -42,6 +43,8 @@ class SEDModel(torch.nn.Module):
             self.tag_token = torch.nn.Parameter(torch.zeros(1, 1, input_dim))
             self.tag_token = torch.nn.init.xavier_normal_(self.tag_token)
         
+        elif self.pooling == "hipool":
+            self.hipool = HiPool(seq_len=62, n_classes=10)
         self.decoder = ConformerMaskedDecoder(**decoder_kwargs)
         self._recon_loss = torch.nn.MSELoss()
         self.reset_parameters(layer_init)
@@ -61,8 +64,11 @@ class SEDModel(torch.nn.Module):
             cls_token = False
         x, _ = self.encoder_masked(x, inds=(masked_inds, unmasked_inds), cls_token=cls_token)
         x_m, _ = self.encoder_masked(x_m, inds=(masked_inds, unmasked_inds), unmasked_only=True, cls_token=cls_token)
-        dec = self.decoder(x_m, inds=(masked_inds, unmasked_inds), with_prompts=True, cls_token=cls_token)
-
+        dec = self.decoder(x_m, inds=(masked_inds, unmasked_inds), cls_token=cls_token)
+        if cls_token:
+            dec_out = dec[:, 1:, :]
+        else:
+            dec_out = dec
         recon_loss = self._recon_loss(dec, input.squeeze(1))
         #recon_loss = self._recon_loss(dec[:, masked_inds], input.squeeze(1)[:, masked_inds]) #mask only
         x = self.classifier(x)
@@ -72,7 +78,7 @@ class SEDModel(torch.nn.Module):
         elif self.pooling == "hipool":
             strong = torch.sigmoid(x)
             weak = self.hipool(strong)
-        return {"strong": strong, "weak": weak, 'recon_loss': recon_loss}
+        return {"strong": strong, "weak": weak, 'recon_loss': recon_loss, 'recon': dec, 'embedding': embs}
 
     def reset_parameters(self, initialization: str = "pytorch"):
         if initialization.lower() == "pytorch":

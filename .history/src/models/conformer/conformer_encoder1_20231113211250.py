@@ -120,17 +120,17 @@ class ConformerMaskedEncoder(torch.nn.Module):
         masked_id, unmasked_id = inds[0], inds[1]
         if unmasked_only:
             if cls_token:
-                inds_all = np.concatenate([np.zeros(1, dtype=np.int64), unmasked_id + 1])
+                inds_all = torch.cat([torch.zeros(1, dtype=torch.int64), unmasked_id + 1])
             else:
                 inds_all = unmasked_id
         else:
             if cls_token:
-                inds_all = np.concatenate([np.zeros(1, dtype=np.int64), 
-                                           masked_id + 1, 
-                                           unmasked_id + 1])
+                inds_all = torch.cat([torch.zeros(1, dtype=torch.int64), 
+                                    masked_id + 1, 
+                                    unmasked_id + 1]).sort()[0]
             else:
-                inds_all = np.concatenate([masked_id, unmasked_id])
-        inds_all.sort()
+                inds_all = torch.cat([masked_id, unmasked_id]).sort()[0]
+
         x = self.input_layer(x)
         x = self.pe(x, inds_all)
         x, _ = self.conformer_blocks(x, None)
@@ -196,7 +196,7 @@ class PromptedConformerMaskedEncoder(torch.nn.Module):
                 inds_all = np.concatenate([np.zeros(1, dtype=np.int64), 
                                            masked_id + 1 + self.pnums, 
                                            unmasked_id + 1 + self.pnums])
-        inds_all.sort()
+                inds_all.sort()
         x = self.input_layer(x)
         x = self.pe(x, inds_all)  
         for e in range(self.elayer):

@@ -23,7 +23,7 @@ from tqdm import tqdm
 
 from baseline_utils.ManyHotEncoder import ManyHotEncoder
 from dataset import SEDDataset
-from models.pado_joint_former import SEDModel
+from models.joint_former import SEDModel
 from trainer import MeanTeacherTrainer, MeanTeacherTrainerOptions
 from transforms import ApplyLog, Compose, get_transforms
 
@@ -76,7 +76,7 @@ def seed_everything(seed):
 
 def parse_args(args):
     parser = argparse.ArgumentParser()
-    parser.add_argument("--config", default="./config/dcase19_pado_jointformer.yaml", type=str, help="config file in yaml format")
+    parser.add_argument("--config", default="./config/dcase19_jointformer.yaml", type=str, help="config file in yaml format")
     parser.add_argument("--debugmode", default=True, action="store_true", help="Debugmode")
     parser.add_argument("--verbose", "-V", default=0, type=int, help="Verbose option")
 

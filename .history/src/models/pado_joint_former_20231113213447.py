@@ -1,5 +1,5 @@
 import torch
-from models.conformer.conformer_encoder1 import ConformerEncoder, ConformerMaskedEncoder
+from models.conformer.conformer_encoder1 import PromptedConformerMaskedEncoder
 from models.transformer.encoder import Encoder as TransformerEncoder
 from models.conformer.downsampler import CNNLocalDownsampler, ConformerDownsamplerBlock
 from models.conformer.conformer_decoder import ConformerMaskedDecoder, MaskedLinearDecoder
@@ -27,7 +27,7 @@ class SEDModel(torch.nn.Module):
         if encoder_type == "Transformer":
             self.encoder = TransformerEncoder(input_dim, **encoder_kwargs)
         elif encoder_type == "Conformer":
-            self.encoder_masked = ConformerMaskedEncoder(input_dim, **encoder_kwargs)
+            self.encoder_masked = PromptedConformerMaskedEncoder(input_dim, **encoder_kwargs)
         else:
             raise ValueError("Choose encoder_type in ['Transformer', 'Conformer']")
 
@@ -47,7 +47,6 @@ class SEDModel(torch.nn.Module):
         self.reset_parameters(layer_init)
 
     def forward(self, input, prompt_tuning=True):
-        embs = input
         x = self.cnn_downsampler(input)
         x_m, masked_inds, unmasked_inds = self.cnn_downsampler(
             input, mask=True, 
@@ -59,10 +58,11 @@ class SEDModel(torch.nn.Module):
             cls_token = True
         else:
             cls_token = False
-        x, _ = self.encoder_masked(x, inds=(masked_inds, unmasked_inds), cls_token=cls_token)
-        x_m, _ = self.encoder_masked(x_m, inds=(masked_inds, unmasked_inds), unmasked_only=True, cls_token=cls_token)
-        dec = self.decoder(x_m, inds=(masked_inds, unmasked_inds), with_prompts=True, cls_token=cls_token)
-
+        x, _ = self.encoder_masked(x, inds=(masked_inds, unmasked_inds), cls_token=cls_token, prompt_tuning=prompt_tuning)
+        x_m, _ = self.encoder_masked(x_m, inds=(masked_inds, unmasked_inds), 
+                                     unmasked_only=True, cls_token=cls_token,
+                                     prompt_tuning=False)
+        dec = self.decoder(x_m, inds=(masked_inds, unmasked_inds), cls_token=cls_token)
         recon_loss = self._recon_loss(dec, input.squeeze(1))
         #recon_loss = self._recon_loss(dec[:, masked_inds], input.squeeze(1)[:, masked_inds]) #mask only
         x = self.classifier(x)
@@ -72,7 +72,7 @@ class SEDModel(torch.nn.Module):
         elif self.pooling == "hipool":
             strong = torch.sigmoid(x)
             weak = self.hipool(strong)
-        return {"strong": strong, "weak": weak, 'recon_loss': recon_loss}
+        return {"strong": strong, "weak": weak, 'recon_loss': recon_loss, 'recon': dec}
 
     def reset_parameters(self, initialization: str = "pytorch"):
         if initialization.lower() == "pytorch":

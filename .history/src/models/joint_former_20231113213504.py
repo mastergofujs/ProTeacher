@@ -60,8 +60,9 @@ class SEDModel(torch.nn.Module):
         else:
             cls_token = False
         x, _ = self.encoder_masked(x, inds=(masked_inds, unmasked_inds), cls_token=cls_token)
-        x_m, _ = self.encoder_masked(x_m, inds=(masked_inds, unmasked_inds), unmasked_only=True, cls_token=cls_token)
-        dec = self.decoder(x_m, inds=(masked_inds, unmasked_inds), with_prompts=True, cls_token=cls_token)
+        x_m, _ = self.encoder_masked(x_m, inds=(masked_inds, unmasked_inds), 
+                                     unmasked_only=True, cls_token=cls_token)
+        dec = self.decoder(x_m, inds=(masked_inds, unmasked_inds), cls_token=cls_token)
 
         recon_loss = self._recon_loss(dec, input.squeeze(1))
         #recon_loss = self._recon_loss(dec[:, masked_inds], input.squeeze(1)[:, masked_inds]) #mask only

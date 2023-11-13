@@ -319,7 +319,8 @@ class MeanTeacherTrainer(object):
             # info_nce = torch.zeros(1).cuda()
         loss = (strong_class_loss + weak_class_loss 
             + consistency_loss_strong + consistency_loss_weak
-            + recon_loss) / self.accum_grad
+            + recon_loss
+            ) / self.accum_grad
         # loss = recon_loss / self.accum_grad
         loss.backward()  # Backprop
         loss.detach()  # Truncate the graph

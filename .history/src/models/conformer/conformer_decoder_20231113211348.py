@@ -152,14 +152,13 @@ class ConformerMaskedDecoder(torch.nn.Module):
                                            unmasked_id + 1]) 
         else:
             inds_all = np.concatenate([masked_id, unmasked_id])
-        #!!!Important!
         inds_all.sort()
         x_u = torch.zeros((b, len(inds_all), d)).cuda()
         if cls_token:
             unmasked_ = np.concatenate([np.zeros(1, dtype=np.int64), unmasked_id + 1])
             x_u[:, masked_id + 1, :] = self.mask_embed
         else:
-            unmasked_ = np.sort(unmasked_id)
+            unmasked_ = unmasked_id
             x_u[:, masked_id, :] = self.mask_embed
         x_u[:, unmasked_, :] = x
         x_u = self.input_layer(x_u)
